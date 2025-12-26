@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#FFD700">
+    <meta name="description" content="App de entrega de carvão - Fornecedores próximos e motoqueiros rápidos">
+    
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="assets/images/icon-192.png">
+    <link rel="apple-touch-icon" href="assets/images/icon-192.png">
+    
+    <title>Carvão Express Delivery</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <!-- App Container -->
+    <div class="app-container">
+        
+        <!-- App Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-fire logo-icon"></i>
+                    <div class="logo-text">
+                        <h1>Carvão<span>Express</span></h1>
+                        <small>Delivery</small>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-icon" id="notificationsBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-count" id="notificationCount">3</span>
+                    </button>
+                    <button class="btn-icon" id="profileBtn">
+                        <img src="assets/images/profile-default.jpg" alt="Perfil" class="profile-pic">
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-item">
+                <i class="fas fa-map-marker-alt status-icon"></i>
+                <div class="status-info">
+                    <span class="status-label">Localização</span>
+                    <span class="status-value" id="currentLocation">Carregando...</span>
+                </div>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-motorcycle status-icon"></i>
+                <div class="status-info">
+                    <span class="status-label">Motoqueiros</span>
+                    <span class="status-value" id="availableRiders">12 disponíveis</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            
+            <!-- Tabs de Navegação -->
+            <nav class="app-tabs">
+                <button class="tab-btn active" data-tab="deliveries">
+                    <i class="fas fa-box"></i>
+                    <span>Entregas</span>
+                </button>
+                <button class="tab-btn" data-tab="suppliers">
+                    <i class="fas fa-store"></i>
+                    <span>Fornecedores</span>
+                </button>
+                <button class="tab-btn" data-tab="riders">
+                    <i class="fas fa-motorcycle"></i>
+                    <span>Motoqueiros</span>
+                </button>
+                <button class="tab-btn" data-tab="orders">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Pedidos</span>
+                </button>
+            </nav>
+
+            <!-- Conteúdo das Tabs -->
+            <div class="tab-content">
+                
+                <!-- Tab: Entregas -->
+                <div class="tab-pane active" id="deliveries">
+                    <!-- Mapa de Entregas -->
+                    <div class="map-container">
+                        <div id="deliveryMap"></div>
+                        <div class="map-controls">
+                            <button class="map-btn" id="locateMe">
+                                <i class="fas fa-location-crosshairs"></i>
+                            </button>
+                            <button class="map-btn" id="zoomIn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="map-btn" id="zoomOut">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Entregas Ativas -->
+                    <section class="active-deliveries">
+                        <h3 class="section-title">
+                            <i class="fas fa-bolt"></i>
+                            Entregas Ativas
+                            <span class="badge" id="activeDeliveriesCount">3</span>
+                        </h3>
+                        
+                        <div class="deliveries-list">
+                            <!-- Entrega 1 -->
+                            <div class="delivery-card">
+                                <div class="delivery-header">
+                                    <span class="delivery-id">#CARV001</span>
+                                    <span class="delivery-status status-pending">Pendente</span>
+                                </div>
+                                <div class="delivery-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-user"></i>
+                                        <span>Cliente: João Silva</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>Av. Paulista, 1000</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-box"></i>
+                                        <span>3 sacos de carvão</span>
+                                    </div>
+                                </div>
+                                <div class="delivery-actions">
+                                    <button class="btn-outline">
+                                        <i class="fas fa-eye"></i>
+                                        Detalhes
+                                    </button>
+                                    <button class="btn-primary assign-btn">
+                                        <i class="fas fa-user-check"></i>
+                                        Atribuir
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Entrega 2 -->
+                            <div class="delivery-card">
+                                <div class="delivery-header">
+                                    <span class="delivery-id">#CARV002</span>
+                                    <span class="delivery-status status-in-progress">Em Andamento</span>
+                                </div>
+                                <div class="delivery-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-user"></i>
+                                        <span>Cliente: Maria Santos</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>Rua Augusta, 500</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-motorcycle"></i>
+                                        <span>Motoqueiro: Carlos</span>
+                                    </div>
+                                </div>
+                                <div class="delivery-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 60%"></div>
+                                    </div>
+                                    <span class="progress-text">60% concluído</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Tab: Fornecedores -->
+                <div class="tab-pane" id="suppliers">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Buscar fornecedor..." id="supplierSearch">
+                    </div>
+                    
+                    <div class="suppliers-list">
+                        <!-- Fornecedor 1 -->
+                        <div class="supplier-card">
+                            <div class="supplier-header">
+                                <div class="supplier-logo">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                                <div class="supplier-info">
+                                    <h4>Carvão Premium SP</h4>
+                                    <div class="supplier-rating">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                        <span>4.5</span>
+                                    </div>
+                                </div>
+                                <span class="distance">1.2 km</span>
+                            </div>
+                            <div class="supplier-details">
+                                <div class="detail">
+                                    <i class="fas fa-clock"></i>
+                                    <span>08:00 - 18:00</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-box"></i>
+                                    <span>Estoque: 150 sacos</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-phone"></i>
+                                    <span>(11) 99999-9999</span>
+                                </div>
+                            </div>
+                            <button class="btn-primary btn-block">
+                                <i class="fas fa-shopping-cart"></i>
+                                Ver Produtos
+                            </button>
+                        </div>
+                        
+                        <!-- Fornecedor 2 -->
+                        <div class="supplier-card">
+                            <div class="supplier-header">
+                                <div class="supplier-logo">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                                <div class="supplier-info">
+                                    <h4>Carvão Express Center</h4>
+                                    <div class="supplier-rating">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="far fa-star"></i>
+                                        <span>4.0</span>
+                                    </div>
+                                </div>
+                                <span class="distance">2.5 km</span>
+                            </div>
+                            <div class="supplier-details">
+                                <div class="detail">
+                                    <i class="fas fa-clock"></i>
+                                    <span>24 horas</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-box"></i>
+                                    <span>Estoque: 80 sacos</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>Entrega rápida</span>
+                                </div>
+                            </div>
+                            <button class="btn-primary btn-block">
+                                <i class="fas fa-shopping-cart"></i>
+                                Ver Produtos
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Motoqueiros -->
+                <div class="tab-pane" id="riders">
+                    <div class="riders-stats">
+                        <div class="stat-card">
+                            <i class="fas fa-motorcycle stat-icon"></i>
+                            <div class="stat-info">
+                                <span class="stat-label">Online</span>
+                                <span class="stat-value" id="onlineRiders">8</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-clock stat-icon"></i>
+                            <div class="stat-info">
+                                <span class="stat-label">Média Tempo</span>
+                                <span class="stat-value">45 min</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-star stat-icon"></i>
+                            <div class="stat-info">
+                                <span class="stat-label">Avaliação</span>
+                                <span class="stat-value">4.7</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="riders-list">
+                        <!-- Motoqueiro 1 -->
+                        <div class="rider-card">
+                            <div class="rider-header">
+                                <img src="assets/images/rider1.jpg" alt="Carlos" class="rider-photo">
+                                <div class="rider-info">
+                                    <h4>Carlos Silva</h4>
+                                    <div class="rider-status status-online">
+                                        <i class="fas fa-circle"></i>
+                                        Online
+                                    </div>
+                                </div>
+                                <div class="rider-rating">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.9</span>
+                                </div>
+                            </div>
+                            <div class="rider-details">
+                                <div class="detail">
+                                    <i class="fas fa-motorcycle"></i>
+                                    <span>Honda CG 160</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>125 entregas</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Disponível agora</span>
+                                </div>
+                            </div>
+                            <button class="btn-outline btn-block">
+                                <i class="fas fa-comment"></i>
+                                Mensagem
+                            </button>
+                        </div>
+                        
+                        <!-- Motoqueiro 2 -->
+                        <div class="rider-card">
+                            <div class="rider-header">
+                                <img src="assets/images/rider2.jpg" alt="Ana" class="rider-photo">
+                                <div class="rider-info">
+                                    <h4>Ana Rodrigues</h4>
+                                    <div class="rider-status status-busy">
+                                        <i class="fas fa-circle"></i>
+                                        Em entrega
+                                    </div>
+                                </div>
+                                <div class="rider-rating">
+                                    <i class="fas fa-star"></i>
+                                    <span>4.8</span>
+                                </div>
+                            </div>
+                            <div class="rider-details">
+                                <div class="detail">
+                                    <i class="fas fa-motorcycle"></i>
+                                    <span>Yamaha Fazer 250</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>98 entregas</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Disponível em 15 min</span>
+                                </div>
+                            </div>
+                            <button class="btn-outline btn-block" disabled>
+                                <i class="fas fa-clock"></i>
+                                Indisponível
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Pedidos -->
+                <div class="tab-pane" id="orders">
+                    <div class="orders-filter">
+                        <button class="filter-btn active">Todos</button>
+                        <button class="filter-btn">Hoje</button>
+                        <button class="filter-btn">Esta Semana</button>
+                        <button class="filter-btn">Este Mês</button>
+                    </div>
+                    
+                    <div class="orders-list">
+                        <!-- Pedido 1 -->
+                        <div class="order-card">
+                            <div class="order-header">
+                                <span class="order-id">#CARV20231215001</span>
+                                <span class="order-status status-delivered">Entregue</span>
+                            </div>
+                            <div class="order-details">
+                                <div class="detail">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>15/12/2023 - 14:30</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-user"></i>
+                                    <span>Cliente: João Silva</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-box"></i>
+                                    <span>2 sacos de carvão</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    <span>Total: R$ 45,90</span>
+                                </div>
+                            </div>
+                            <div class="order-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Pedido 2 -->
+                        <div class="order-card">
+                            <div class="order-header">
+                                <span class="order-id">#CARV20231214002</span>
+                                <span class="order-status status-canceled">Cancelado</span>
+                            </div>
+                            <div class="order-details">
+                                <div class="detail">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>14/12/2023 - 10:15</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-user"></i>
+                                    <span>Cliente: Maria Santos</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-box"></i>
+                                    <span>1 saco de carvão</span>
+                                </div>
+                                <div class="detail">
+                                    <i class="fas fa-times-circle"></i>
+                                    <span>Motivo: Cliente não atendeu</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-btn" id="newDeliveryBtn">
+                <i class="fas fa-plus-circle"></i>
+                Nova Entrega
+            </button>
+        </nav>
+
+        <!-- Modal Nova Entrega -->
+        <div class="modal" id="newDeliveryModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Nova Entrega</h3>
+                    <button class="close-modal" id="closeModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="deliveryForm">
+                        <div class="form-group">
+                            <label for="clientName">
+                                <i class="fas fa-user"></i>
+                                Nome do Cliente
+                            </label>
+                            <input type="text" id="clientName" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="clientPhone">
+                                <i class="fas fa-phone"></i>
+                                Telefone
+                            </label>
+                            <input type="tel" id="clientPhone" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="deliveryAddress">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Endereço de Entrega
+                            </label>
+                            <textarea id="deliveryAddress" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productType">
+                                <i class="fas fa-fire"></i>
+                                Tipo de Carvão
+                            </label>
+                            <select id="productType" required>
+                                <option value="">Selecione...</option>
+                                <option value="vegetal">Carvão Vegetal</option>
+                                <option value="mineral">Carvão Mineral</option>
+                                <option value="briquete">Briquete</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="quantity">
+                                <i class="fas fa-box"></i>
+                                Quantidade (sacos)
+                            </label>
+                            <div class="quantity-selector">
+                                <button type="button" class="quantity-btn" id="decreaseQty">-</button>
+                                <input type="number" id="quantity" value="1" min="1" max="20">
+                                <button type="button" class="quantity-btn" id="increaseQty">+</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="supplierSelect">
+                                <i class="fas fa-store"></i>
+                                Fornecedor
+                            </label>
+                            <select id="supplierSelect" required>
+                                <option value="">Selecione o fornecedor mais próximo</option>
+                                <option value="1">Carvão Premium SP (1.2 km)</option>
+                                <option value="2">Carvão Express Center (2.5 km)</option>
+                                <option value="3">Carvão Top Quality (3.1 km)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn-outline" id="cancelDelivery">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                                Criar Entrega
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Notifications -->
+        <div class="toast-container" id="toastContainer"></div>
+
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- App JavaScript -->
+    <script src="assets/js/app.js"></script>
+    <script src="assets/js/map.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha no Service Worker:', error);
+                    });
+            });
+        }
+        
+        // Verificar se veio da tela de loading
+        if (!sessionStorage.getItem('fromLoading')) {
+            sessionStorage.setItem('fromLoading', 'true');
+            window.location.href = 'loading.html';
+        }
+    </script>
+</body>
+</html>
